@@ -26,12 +26,10 @@ namespace CGLab5
                 if (string.IsNullOrEmpty(line) || line.StartsWith("//") || line.StartsWith("#"))
                     continue;
 
-                // Чтение интерпретации (например: INTERPRET: + ROTATE RANDOM 10)
                 if (line.StartsWith("INTERPRET:", StringComparison.OrdinalIgnoreCase))
                 {
                     ParseInterpretation(line, lSystem);
                 }
-                // Чтение правил замены
                 else if (line.Contains("->") || line.Contains("→"))
                 {
                     string[] ruleParts = line.Contains("->")
@@ -47,7 +45,6 @@ namespace CGLab5
                 }
             }
 
-            // Если в файле нет интерпретаций, задаём стандартные (для обратной совместимости)
             if (lSystem.Interpretations.Count == 0)
             {
                 SetDefaultInterpretations(lSystem);
@@ -72,12 +69,9 @@ namespace CGLab5
                 {
                     interp.IsRandom = true;
 
-                    // Базовый угол берём из первой строки файла (lSystem.Angle)
-                    // Если есть знак минус перед RANDOM, делаем угол отрицательным
                     bool isNegative = parts[3].StartsWith("-");
                     interp.Value = isNegative ? -lSystem.Angle : lSystem.Angle;
 
-                    // Диапазон случайности
                     if (parts.Length > 4)
                     {
                         interp.RandomRange = double.Parse(parts[4], System.Globalization.CultureInfo.InvariantCulture);
@@ -85,7 +79,6 @@ namespace CGLab5
                 }
                 else
                 {
-                    // Фиксированный угол
                     interp.Value = double.Parse(parts[3], System.Globalization.CultureInfo.InvariantCulture);
                 }
             }

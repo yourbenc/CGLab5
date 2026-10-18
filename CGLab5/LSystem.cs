@@ -12,7 +12,6 @@ namespace CGLab5
         public double InitialDirection { get; set; }
         public bool UseRandomness { get; set; }
 
-        // Словарь для кастомной интерпретации команд из файла
         public Dictionary<char, CommandInterpretation> Interpretations { get; set; }
 
         public LSystem()
@@ -41,7 +40,6 @@ namespace CGLab5
         }
     }
 
-    // Класс для описания того, как интерпретировать конкретный символ
     public class CommandInterpretation
     {
         public string ActionType { get; set; } // "FORWARD", "ROTATE", "SAVE", "RESTORE"

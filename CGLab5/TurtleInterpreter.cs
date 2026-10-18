@@ -57,7 +57,6 @@ namespace CGLab5
             }
             else
             {
-                // Fallback для совместимости
                 switch (command)
                 {
                     case 'F': case 'G': MoveForward(true, 1.0); break;
@@ -79,12 +78,10 @@ namespace CGLab5
                     break;
 
                 case "ROTATE":
-                    double angle = interp.Value; // Базовый угол
+                    double angle = interp.Value;
 
                     if (interp.IsRandom)
                     {
-                        // ИСПРАВЛЕНО: добавляем случайное отклонение к базовому углу
-                        // Диапазон: от -RandomRange до +RandomRange
                         double randomDeviation = (_random.NextDouble() - 0.5) * 2 * interp.RandomRange;
                         angle = angle + randomDeviation;
                     }

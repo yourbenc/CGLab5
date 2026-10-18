@@ -123,9 +123,10 @@ namespace CGLab5
 
         private void FractalTree_Click(object sender, RoutedEventArgs e)
         {
+            // ИСПРАВЛЕНО: все ветки теперь внутри скобок
             var lSystem = LSystemParser.CreateFromString(
-                "X", 25, 0,
-                ('X', "F[+X]F[-X]+X"),
+                "X", 25, -90,
+                ('X', "F[+X]F[-X]F[+X]"),  // Было: "F[+X]F[-X]+X"
                 ('F', "FF")
             );
 

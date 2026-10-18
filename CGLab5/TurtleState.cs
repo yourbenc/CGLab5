@@ -9,5 +9,6 @@ namespace CGLab5
         public double Angle { get; set; }
         public double Thickness { get; set; }
         public Color Color { get; set; }
+        public int BranchDepth { get; set; }
     }
 }

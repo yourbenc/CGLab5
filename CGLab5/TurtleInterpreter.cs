@@ -14,6 +14,8 @@ namespace CGLab5
         private List<LineSegment> _segments;
         private double _thickness;
         private Color _color;
+        private int _branchDepth;
+        private const int MaxBranchDepth = 4;
         private Random _random;
         private bool _useRandomness;
         private bool _isTreeMode;
@@ -32,6 +34,7 @@ namespace CGLab5
         {
             _currentPosition = new Point(0, 0);
             _currentAngle = 0;
+            _branchDepth = 0;
             _thickness = _isTreeMode ? 5.0 : 1.0;
             _color = _isTreeMode ? Colors.SaddleBrown : Colors.Black;
             _segments.Clear();
@@ -70,9 +73,10 @@ namespace CGLab5
                     break;
                 case '[':
                     SaveState();
+                    _branchDepth++;
                     break;
                 case ']':
-                    RestoreState();
+                    RestoreState(); // Сначала восстанавливаем состояние (включая глубину)
                     break;
                 case 'X':
                 case 'Y':
@@ -84,7 +88,6 @@ namespace CGLab5
 
         private void MoveForward(bool draw)
         {
-            // В WPF: 0° = вправо, 90° = вниз, -90° = вверх
             double angleRad = _currentAngle * Math.PI / 180.0;
             double dx = Math.Cos(angleRad);
             double dy = Math.Sin(angleRad);
@@ -96,6 +99,12 @@ namespace CGLab5
 
             if (draw)
             {
+                if (_isTreeMode)
+                {
+                    double colorFactor = Math.Min(1.0, (double)_branchDepth / MaxBranchDepth);
+                    _color = InterpolateColor(Colors.SaddleBrown, Colors.ForestGreen, colorFactor);
+                }
+
                 _segments.Add(new LineSegment
                 {
                     Start = _currentPosition,
@@ -107,7 +116,6 @@ namespace CGLab5
                 if (_isTreeMode)
                 {
                     _thickness = Math.Max(0.5, _thickness * 0.7);
-                    _color = InterpolateColor(Colors.SaddleBrown, Colors.ForestGreen, 0.15);
                 }
             }
 
@@ -126,7 +134,8 @@ namespace CGLab5
                 Position = _currentPosition,
                 Angle = _currentAngle,
                 Thickness = _thickness,
-                Color = _color
+                Color = _color,
+                BranchDepth = _branchDepth // Сохраняем глубину в стеке
             });
         }
 
@@ -139,6 +148,7 @@ namespace CGLab5
                 _currentAngle = state.Angle;
                 _thickness = state.Thickness;
                 _color = state.Color;
+                _branchDepth = state.BranchDepth; // Восстанавливаем глубину из стека
             }
         }
 
@@ -153,10 +163,11 @@ namespace CGLab5
 
         private Color InterpolateColor(Color from, Color to, double factor)
         {
+            factor = Math.Max(0, Math.Min(1, factor));
             return Color.FromRgb(
-                (byte)Math.Max(0, Math.Min(255, from.R + (to.R - from.R) * factor)),
-                (byte)Math.Max(0, Math.Min(255, from.G + (to.G - from.G) * factor)),
-                (byte)Math.Max(0, Math.Min(255, from.B + (to.B - from.B) * factor))
+                (byte)(from.R + (to.R - from.R) * factor),
+                (byte)(from.G + (to.G - from.G) * factor),
+                (byte)(from.B + (to.B - from.B) * factor)
             );
         }
 

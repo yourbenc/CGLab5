@@ -10,20 +10,18 @@ namespace CGLab5
         private Stack<TurtleState> _stateStack;
         private Point _currentPosition;
         private double _currentAngle;
-        private double _angleIncrement;
         private List<LineSegment> _segments;
         private double _thickness;
         private Color _color;
         private int _branchDepth;
         private const int MaxBranchDepth = 4;
         private Random _random;
-        private bool _useRandomness;
         private bool _isTreeMode;
+        private LSystem _lSystem;
 
-        public TurtleInterpreter(double angleIncrement, bool useRandomness = false, bool isTreeMode = false)
+        public TurtleInterpreter(LSystem lSystem, bool isTreeMode = false)
         {
-            _angleIncrement = angleIncrement;
-            _useRandomness = useRandomness;
+            _lSystem = lSystem;
             _isTreeMode = isTreeMode;
             _stateStack = new Stack<TurtleState>();
             _segments = new List<LineSegment>();
@@ -33,7 +31,7 @@ namespace CGLab5
         public void Reset()
         {
             _currentPosition = new Point(0, 0);
-            _currentAngle = 0;
+            _currentAngle = _lSystem.InitialDirection;
             _branchDepth = 0;
             _thickness = _isTreeMode ? 5.0 : 1.0;
             _color = _isTreeMode ? Colors.SaddleBrown : Colors.Black;
@@ -41,61 +39,77 @@ namespace CGLab5
             _stateStack.Clear();
         }
 
-        public List<LineSegment> Interpret(string lSystemString, double initialDirection = 0)
+        public List<LineSegment> Interpret(string lSystemString)
         {
             Reset();
-            _currentAngle = initialDirection;
-
             foreach (char c in lSystemString)
             {
                 ProcessCommand(c);
             }
-
             return _segments;
         }
 
         private void ProcessCommand(char command)
         {
-            switch (command)
+            if (_lSystem.Interpretations.ContainsKey(command))
             {
-                case 'F':
-                case 'G':
-                    MoveForward(true);
+                ExecuteInterpretation(_lSystem.Interpretations[command]);
+            }
+            else
+            {
+                // Fallback для совместимости
+                switch (command)
+                {
+                    case 'F': case 'G': MoveForward(true, 1.0); break;
+                    case 'f': MoveForward(false, 1.0); break;
+                    case '+': Rotate(_lSystem.Angle); break;
+                    case '-': Rotate(-_lSystem.Angle); break;
+                    case '[': SaveState(); _branchDepth++; break;
+                    case ']': RestoreState(); break;
+                }
+            }
+        }
+
+        private void ExecuteInterpretation(CommandInterpretation interp)
+        {
+            switch (interp.ActionType)
+            {
+                case "FORWARD":
+                    MoveForward(true, interp.Value);
                     break;
-                case 'f':
-                    MoveForward(false);
+
+                case "ROTATE":
+                    double angle = interp.Value; // Базовый угол
+
+                    if (interp.IsRandom)
+                    {
+                        // ИСПРАВЛЕНО: добавляем случайное отклонение к базовому углу
+                        // Диапазон: от -RandomRange до +RandomRange
+                        double randomDeviation = (_random.NextDouble() - 0.5) * 2 * interp.RandomRange;
+                        angle = angle + randomDeviation;
+                    }
+
+                    Rotate(angle);
                     break;
-                case '+':
-                    Rotate(GetRandomAngle(_angleIncrement));
-                    break;
-                case '-':
-                    Rotate(GetRandomAngle(-_angleIncrement));
-                    break;
-                case '[':
+
+                case "SAVE":
                     SaveState();
                     _branchDepth++;
                     break;
-                case ']':
-                    RestoreState(); // Сначала восстанавливаем состояние (включая глубину)
-                    break;
-                case 'X':
-                case 'Y':
-                case 'A':
-                case 'B':
+
+                case "RESTORE":
+                    RestoreState();
                     break;
             }
         }
 
-        private void MoveForward(bool draw)
+        private void MoveForward(bool draw, double length = 1.0)
         {
             double angleRad = _currentAngle * Math.PI / 180.0;
-            double dx = Math.Cos(angleRad);
-            double dy = Math.Sin(angleRad);
+            double dx = Math.Cos(angleRad) * length;
+            double dy = Math.Sin(angleRad) * length;
 
-            Point newPosition = new Point(
-                _currentPosition.X + dx,
-                _currentPosition.Y + dy
-            );
+            Point newPosition = new Point(_currentPosition.X + dx, _currentPosition.Y + dy);
 
             if (draw)
             {
@@ -118,14 +132,10 @@ namespace CGLab5
                     _thickness = Math.Max(0.5, _thickness * 0.7);
                 }
             }
-
             _currentPosition = newPosition;
         }
 
-        private void Rotate(double angle)
-        {
-            _currentAngle += angle;
-        }
+        private void Rotate(double angle) => _currentAngle += angle;
 
         private void SaveState()
         {
@@ -135,7 +145,7 @@ namespace CGLab5
                 Angle = _currentAngle,
                 Thickness = _thickness,
                 Color = _color,
-                BranchDepth = _branchDepth // Сохраняем глубину в стеке
+                BranchDepth = _branchDepth
             });
         }
 
@@ -148,17 +158,8 @@ namespace CGLab5
                 _currentAngle = state.Angle;
                 _thickness = state.Thickness;
                 _color = state.Color;
-                _branchDepth = state.BranchDepth; // Восстанавливаем глубину из стека
+                _branchDepth = state.BranchDepth;
             }
-        }
-
-        private double GetRandomAngle(double baseAngle)
-        {
-            if (_useRandomness)
-            {
-                return baseAngle + _random.NextDouble() * 10 - 5;
-            }
-            return baseAngle;
         }
 
         private Color InterpolateColor(Color from, Color to, double factor)

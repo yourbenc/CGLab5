@@ -25,14 +25,11 @@ namespace CGLab5
         private void DrawFractal(LSystem lSystem, int iterations, bool isTree = false)
         {
             _currentLSystem = lSystem;
-            bool useRandomness = (RandomnessCheckBox.IsChecked == true) && isTree;
 
-            _interpreter = new TurtleInterpreter(lSystem.Angle, useRandomness, isTree);
+            _interpreter = new TurtleInterpreter(lSystem, isTree);
             string generatedString = lSystem.Generate(iterations);
 
-            double initialDir = isTree ? -90 : lSystem.InitialDirection;
-
-            _currentSegments = _interpreter.Interpret(generatedString, initialDir);
+            _currentSegments = _interpreter.Interpret(generatedString);
 
             RenderSegments();
         }

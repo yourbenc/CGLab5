@@ -12,9 +12,13 @@ namespace CGLab5
         public double InitialDirection { get; set; }
         public bool UseRandomness { get; set; }
 
+        // Словарь для кастомной интерпретации команд из файла
+        public Dictionary<char, CommandInterpretation> Interpretations { get; set; }
+
         public LSystem()
         {
             Rules = new Dictionary<char, string>();
+            Interpretations = new Dictionary<char, CommandInterpretation>();
             UseRandomness = false;
         }
 
@@ -35,5 +39,14 @@ namespace CGLab5
             }
             return current;
         }
+    }
+
+    // Класс для описания того, как интерпретировать конкретный символ
+    public class CommandInterpretation
+    {
+        public string ActionType { get; set; } // "FORWARD", "ROTATE", "SAVE", "RESTORE"
+        public double Value { get; set; }      // Значение (например, угол или длина шага)
+        public bool IsRandom { get; set; }     // Флаг случайности
+        public double RandomRange { get; set; } // Диапазон случайности (например, 10 для +/- 10)
     }
 }

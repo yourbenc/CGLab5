@@ -1,0 +1,16 @@
+<UserControl x:Class="CGLab5.BezierEditor"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <DockPanel Margin="10">
+        <TextBlock DockPanel.Dock="Top" Margin="0,0,0,10" TextWrapping="Wrap"
+                   Text="ЛКМ по полю — добавить точку. Перетащите точку ЛКМ, чтобы переместить её. ПКМ по точке — удалить."/>
+        <Border BorderBrush="#CCCCCC" BorderThickness="1">
+            <Canvas x:Name="Plot" Background="White" ClipToBounds="True"
+                    MouseLeftButtonDown="StartEdit" MouseLeftButtonUp="EndEdit"
+                    MouseRightButtonDown="DeletePoint" MouseMove="MovePoint"
+                    LostMouseCapture="CancelDrag">
+                <Path x:Name="Curve" Stroke="#245DA8" StrokeThickness="2" IsHitTestVisible="False"/>
+            </Canvas>
+        </Border>
+    </DockPanel>
+</UserControl>

@@ -1,30 +1,111 @@
-﻿<Window x:Class="CGLab5.MainWindow"
+<Window x:Class="CGLab5.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Групповая лабораторная: L-системы" Height="700" Width="1000">
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
+        Title="Групповая лабораторная: фракталы"
+        Height="700"
+        Width="1000">
+    <TabControl>
+        <TabItem Header="L-системы">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
 
-        <Border Grid.Row="0" Background="#F5F5F5" BorderBrush="#CCCCCC" BorderThickness="0,0,0,1">
-            <WrapPanel Margin="10" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <Border Grid.Row="0" Background="#F5F5F5" BorderBrush="#CCCCCC" BorderThickness="0,0,0,1">
+                    <WrapPanel Margin="10" HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <Button Content="📂 Загрузить файл L-системы..." Click="LoadFromFile_Click" Margin="5" Padding="10,5" FontWeight="SemiBold"/>
+                        <Separator Width="1" Margin="15,5" Background="Gray"/>
+                        <TextBlock Text="Итерации:" VerticalAlignment="Center" Margin="5,0"/>
+                        <TextBox x:Name="IterationsTextBox" Text="5" Width="50" Margin="5" VerticalContentAlignment="Center" TextAlignment="Center"/>
+                        <Separator Width="1" Margin="15,5" Background="Gray"/>
+                        <Button Content="🔄 Перерисовать" Click="Redraw_Click" Margin="5" Padding="10,5" Background="#E3F2FD"/>
+                        <Button Content="❌ Очистить" Click="Clear_Click" Margin="5" Padding="10,5"/>
+                    </WrapPanel>
+                </Border>
 
-                <Button Content="📂 Загрузить файл L-системы..." Click="LoadFromFile_Click" Margin="5" Padding="10,5" FontWeight="SemiBold"/>
+                <Canvas x:Name="FractalCanvas" Grid.Row="1" Background="White" ClipToBounds="True"/>
+            </Grid>
+        </TabItem>
 
-                <Separator Width="1" Margin="15,5" Background="Gray"/>
+        <TabItem Header="Midpoint displacement">
+            <Grid Margin="10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="270"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
 
-                <TextBlock Text="Итерации:" VerticalAlignment="Center" Margin="5,0"/>
-                <TextBox x:Name="IterationsTextBox" Text="5" Width="50" Margin="5" VerticalContentAlignment="Center" TextAlignment="Center"/>
+                <ScrollViewer Grid.Column="0" VerticalScrollBarVisibility="Auto">
+                    <StackPanel Margin="5">
+                        <TextBlock Text="Горный профиль"
+                                   FontSize="18"
+                                   FontWeight="Bold"
+                                   Margin="0,0,0,10"/>
 
-                <Separator Width="1" Margin="15,5" Background="Gray"/>
+                        <TextBlock Text="Начальных отрезков:"/>
+                        <TextBox x:Name="MidpointSegmentsTextBox" Text="1" Margin="0,3,0,8"/>
 
-                <Button Content="🔄 Перерисовать" Click="Redraw_Click" Margin="5" Padding="10,5" Background="#E3F2FD"/>
-                <Button Content="❌ Очистить" Click="Clear_Click" Margin="5" Padding="10,5"/>
-            </WrapPanel>
-        </Border>
+                        <TextBlock Text="Число итераций (1–12):"/>
+                        <TextBox x:Name="MidpointIterationsTextBox" Text="8" Margin="0,3,0,8"/>
 
-        <Canvas x:Name="FractalCanvas" Grid.Row="1" Background="White" ClipToBounds="True"/>
-    </Grid>
+                        <TextBlock Text="Начальная амплитуда:"/>
+                        <TextBox x:Name="MidpointAmplitudeTextBox" Text="120" Margin="0,3,0,8"/>
+
+                        <TextBlock Text="Уменьшение амплитуды (0–1):"/>
+                        <TextBox x:Name="MidpointRoughnessTextBox" Text="0.55" Margin="0,3,0,8"/>
+
+                        <TextBlock Text="Seed (для повторяемого результата):"/>
+                        <TextBox x:Name="MidpointSeedTextBox" Text="42" Margin="0,3,0,12"/>
+
+                        <Button Content="Сгенерировать шаги"
+                                Click="GenerateMidpoint_Click"
+                                Padding="6"
+                                Margin="0,0,0,12"
+                                Background="#E3F2FD"/>
+
+                        <TextBlock Text="Просмотр последовательных шагов"
+                                   FontWeight="SemiBold"
+                                   Margin="0,0,0,5"/>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                            <Button x:Name="PreviousMidpointStepButton"
+                                    Content="◀ Назад"
+                                    Click="PreviousMidpointStep_Click"
+                                    Padding="8,4"
+                                    IsEnabled="False"/>
+                            <TextBlock x:Name="MidpointStepText"
+                                       Text="Шаг 0 / 0"
+                                       VerticalAlignment="Center"
+                                       Margin="10,0"/>
+                            <Button x:Name="NextMidpointStepButton"
+                                    Content="Вперёд ▶"
+                                    Click="NextMidpointStep_Click"
+                                    Padding="8,4"
+                                    IsEnabled="False"/>
+                        </StackPanel>
+
+                        <TextBlock x:Name="MidpointStatusText"
+                                   Text="Задайте параметры и сгенерируйте последовательность."
+                                   TextWrapping="Wrap"
+                                   Foreground="DarkBlue"
+                                   Margin="0,12,0,0"/>
+
+                        <Button Content="Очистить результат"
+                                Click="ClearMidpoint_Click"
+                                Margin="0,12,0,0"
+                                Padding="6"/>
+                    </StackPanel>
+                </ScrollViewer>
+
+                <Border Grid.Column="1"
+                        Margin="10,0,0,0"
+                        BorderBrush="#CCCCCC"
+                        BorderThickness="1">
+                    <Canvas x:Name="MidpointCanvas"
+                            Background="White"
+                            ClipToBounds="True"
+                            SizeChanged="MidpointCanvas_SizeChanged"/>
+                </Border>
+            </Grid>
+        </TabItem>
+    </TabControl>
 </Window>
